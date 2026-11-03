@@ -1,6 +1,18 @@
 
 let showPopup = false;
-const api = "https://unmalicious-feverish-delora.ngrok-free.dev/"
+const api = "https://unmalicious-feverish-delora.ngrok-free.dev/";
+let canplayaudio = true;
+let errorsound = new Audio("error.mp3");
+
+const olderror = console.error;
+
+console.error = function(message) {
+    if (canplayaudio) {
+        errorsound.currentTime = 0;
+        errorsound.play();
+    }
+    olderror(message);
+};
 
 document.getElementById("chatbox").addEventListener("keydown", function(event) {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -49,23 +61,23 @@ function setselectedaimodel(option) {
 }
 
 function askoverwrite() {
-    const canoverwrite = confirm("The saved chat will be PERMANENTLY deleted, Continue?")
+    const canoverwrite = confirm("The saved chat will be PERMANENTLY deleted, Continue?");
 
     if (canoverwrite) {
-        clearSavedChat()
+        clearSavedChat();
     }
 }
 
 function asksave(option) {
-    const canoverwrite = confirm("Changing this option is gonna clear the currently saved chat, Continue?")
+    const canoverwrite = confirm("Changing this option is gonna clear the currently saved chat, Continue?");
 
     if (canoverwrite) {
         setselectedaimodel(option);
-        clearSavedChat()
+        clearSavedChat();
     } else {
         const select = document.getElementById("model");
         const savedModel = localStorage.getItem("selectedAIModel");
-        select.value = savedModel
+        select.value = savedModel;
     }
 }
 
@@ -81,10 +93,57 @@ function loadselectedaimodel() {
 const preload = localStorage.getItem("selectedAIModel");
 
 if (!preload) {
-    setselectedaimodel("llama3.2:3b")
+    setselectedaimodel("Default");
 }
 
 window.addEventListener("DOMContentLoaded", loadselectedaimodel);
+
+function updateAILevel(value) {
+    const text = {
+        1: "Low",
+        2: "Medium",
+        3: "High"
+    };
+
+    document.getElementById("selectailvltext").textContent =
+        "AI Level (" + (text[value] || "Low") + ")";
+}
+
+function loadAILevel() {
+    const slider = document.getElementById("level");
+    const savedLevel = Number(localStorage.getItem("selectedAILevel")) || 1;
+
+    slider.value = Math.min(
+        Number(slider.max),
+        Math.max(Number(slider.min), savedLevel)
+    );
+
+    updateAILevel(Number(slider.value));
+}
+
+function saveAILevel() {
+    const slider = document.getElementById("level");
+    const level = Number(slider.value);
+
+    localStorage.setItem("selectedAILevel", level);
+    updateAILevel(level);
+}
+
+function confirmAILevel() {
+    const slider = document.getElementById("level");
+    const previousLevel = Number(localStorage.getItem("selectedAILevel")) || 1;
+    const newLevel = Number(slider.value);
+
+    if (newLevel === previousLevel) return;
+
+    if (confirm("Changing the AI level is gonna clear the currently saved chat, Continue?")) {
+        saveAILevel();
+        clearSavedChat();
+    } else {
+        slider.value = previousLevel;
+        updateAILevel(previousLevel);
+    }
+}
 
 function saveChat() {
     localStorage.setItem(
@@ -132,11 +191,11 @@ async function sendToAI(message, history, onEvent) {
     const controller = new AbortController();
     window.aiController = controller;
 
-    const apikey = document.getElementById("apikeyinput").value
+    const apikey = document.getElementById("apikeyinput").value;
 
     if (message === "/settings") {
-        document.getElementById("settingsoverlay").style.display = "flex"
-        return
+        document.getElementById("settingsoverlay").style.display = "flex";
+        return;
     }
 
     try {
@@ -150,7 +209,9 @@ async function sendToAI(message, history, onEvent) {
                 message,
                 sessionId,
                 history,
-                model: localStorage.getItem("selectedAIModel") || "llama3.2:3b",
+                selection: localStorage.getItem("selectedAIModel") || "Default",
+                level: Number(localStorage.getItem("selectedAILevel")) || 1,
+                noswearing: localStorage.getItem("canswear") === "true"
             }),
             signal: controller.signal
         });
@@ -236,6 +297,12 @@ async function sendMessage(element) {
 
     if (!message) return;
 
+    if (message === "/settings") {
+        document.getElementById("settingsoverlay").style.display = "flex";
+        element.value = "";
+        return;
+    }
+
     document.getElementById("chatbox").readOnly = true;
     document.getElementById("chatbox").value = "";
     document.getElementById("chatbox").setAttribute("placeholder", "AI responding...");
@@ -253,10 +320,16 @@ async function sendMessage(element) {
         content: message
     });
 
-    saveChat();
+    const response = document.getElementById("response");
+
+    const userParagraph = document.createElement("p");
+    userParagraph.textContent = `You: ${message}`;
+    response.appendChild(userParagraph);
 
     const paragraph = document.createElement("p");
-    document.getElementById("response").appendChild(paragraph);
+    paragraph.textContent = "AI: ";
+    response.appendChild(paragraph);
+
     saveChat();
 
     try {
@@ -276,20 +349,20 @@ async function sendMessage(element) {
             }
         );
 
-        chatHistory.push({
-            role: "assistant",
-            content: answer
-        });
+        if (answer) {
+            chatHistory.push({
+                role: "assistant",
+                content: answer
+            });
+        }
 
         saveChat();
     } catch (error) {
         if (error.name !== "AbortError") {
             console.error(error);
-
-            paragraph.appendChild(
-                document.createTextNode(` Error: ${error.message}`)
-            );
-
+            paragraph.textContent = `Error: ${error.message}`;
+            saveChat();
+        } else {
             saveChat();
         }
     } finally {
@@ -315,7 +388,7 @@ async function clearSavedChat() {
 
     document.getElementById("response").replaceChildren();
 
-    const apikey = document.getElementById("apikeyinput").value
+    const apikey = document.getElementById("apikeyinput").value;
 
     try {
         const response = await fetch(api + "clear-chat", {
@@ -328,7 +401,13 @@ async function clearSavedChat() {
         });
 
         if (!response.ok) {
-            throw new Error("Failed to clear server chat history.");
+            const data = await response.json().catch(() => ({}));
+
+            throw new Error(
+                data.error || "Failed to clear server chat history."
+            );
+        } else {
+            stopAI()
         }
 
         saveChat();
@@ -346,6 +425,22 @@ apikeyinput.addEventListener("input", () => {
 });
 
 window.addEventListener("DOMContentLoaded", loadChat);
+
+const levelSlider = document.getElementById("level");
+const canswearcheckbox = document.getElementById("canswearcheckbox");
+
+canswearcheckbox.checked = localStorage.getItem("canswear") === "true";
+
+levelSlider.addEventListener("input", function() {
+    updateAILevel(Number(levelSlider.value));
+    confirmAILevel();
+});
+
+canswearcheckbox.addEventListener("input", function() {
+    localStorage.setItem("canswear", String(canswearcheckbox.checked));
+});
+
+loadAILevel();
 
 window.addEventListener("beforeunload", () => {
     stopAI();
