@@ -170,6 +170,33 @@
             color: white;
         }
 
+        #selectailevel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        #selectailevel p {
+            margin: 0;
+            color: white;
+            width: 130px;
+        }
+
+        #cansweardiv {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        #cansweardiv p {
+            margin: 0;
+            color: white;
+        }
+
         #apikeyinputbox p {
             margin: 0;
             color: white;
@@ -207,12 +234,20 @@
 
             <div id="selectaimodel">
                 <select title="AI Model" id="model" onchange=" asksave(this.value)">
-                    <option value="llama3.2:3b" selected>llama3.2:3b</option>
-                    <option value="qwen2.5:1.5b">qwen2.5:1.5b</option>
-                    <option value="gemma3:1b">gemma3:1b</option>
-                    <option value="emotion-game">Emotions</option>
+                    <option value="Default" selected>Default AI Models</option>
+                    <option value="Emotion">Emotion AI Models</option>
                 </select>
                 <p>AI model to use</p>
+            </div>
+
+            <div id="selectailevel">
+                <input type="range" max="3" min="1" value="1" id="level">
+                <p id="selectailvltext">AI Level (Low)</p>
+            </div>
+
+            <div id="cansweardiv">
+                <input type="checkbox" id="canswearcheckbox">
+                <p>Ignore Filter</p>
             </div>
 
             <div id="apikeyinputbox">
