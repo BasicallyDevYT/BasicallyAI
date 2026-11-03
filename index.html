@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasicallyAI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: rgb(0, 0, 0);
+            color: white;
+            justify-items: center;
+            text-align: center;
+        }
+
+        button {
+            user-select: none;
+        }
+
+        #chatbox {
+            width: 100%;
+            min-height: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            resize: none;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            justify-self: center;
+            box-sizing: border-box;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            border: none;
+            background-color: transparent;
+            color: white;
+            margin-left: 3%;
+        }
+
+        #chatbox:focus {
+            outline: none;
+        }
+
+        #chatbox::placeholder {
+            color: rgb(200, 200, 200);
+        }
+
+        #chatboxparent {
+            background-color: rgb(100, 100, 100);
+            width: 400px;
+            height: 40x;
+            border-radius: 20px;
+            align-items: center;
+            text-align: center;
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        #send {
+            border-radius: 50px;
+            width: 40px;
+            height: 35px;
+            font-size: large;
+            cursor: pointer;
+        }
+
+        #response {
+            border: 1px solid black;
+            width: 750px;
+            min-height: 25px;
+            height: auto;
+            align-items: center;
+            background-color: rgb(125, 125, 125);
+            border-radius: 20px;
+        }
+
+        #response p {
+            text-align: center;
+        }
+
+        #settingsoverlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40%;
+            height: 80vh;
+            z-index: 999999;
+            background-color: rgb(100, 100, 100);  
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+            display: none;
+        }
+
+        #settingsoverlay h1 {
+            color: white;
+            position: absolute;
+            top: 0;
+            left: 5%;
+            cursor: default;
+            user-select: none;
+        }
+
+        #settingsoverlayclosebutton {
+            background-color: red;
+            border: 1px solid black;
+            width: 40px;
+            height: 35px;
+            position: absolute;
+            top: 3vh;
+            left: 90%;
+            font-size: x-large;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #settingsoverlayclosebutton:hover {
+            background-color: darkred;
+        }
+
+        #settingsoverlayclosebutton:active {
+            background-color: hsl(0, 100%, 59%);
+            border: 1px solid white;
+        }
+
+        #settingsbutton {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgb(100, 100, 100);
+            cursor: pointer;
+        }
+
+        #settings {
+            background-color: rgb(75, 75, 75);
+            width: 90%;
+            height: 85%;
+            position: absolute;
+            top: 10%;
+            border-radius: 20px;
+        }
+
+        #clearsavedchat {
+            cursor: pointer;
+            background-color: rgb(200, 200, 200);
+            border: 1px solid black;
+        }
+
+        #clearsavedchat:hover {
+            background-color: rgb(150, 150, 150);
+        }
+
+        #clearsavedchat:active {
+            background-color: rgb(225, 225, 225);
+            border: 1px solid white;
+        }
+
+        #selectaimodel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        #selectaimodel p {
+            margin: 0;
+            color: white;
+        }
+
+        #apikeyinputbox p {
+            margin: 0;
+            color: white;
+        }
+
+        #apikeyinputbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="document.getElementById('settingsoverlay').style.display = 'flex'" id="settingsbutton" title="Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M19.4 13.5a7.7 7.7 0 0 0 0-3l2-1.5-2-3.5-2.4 1a7.5 7.5 0 0 0-2.6-1.5L14 2h-4l-.4 3a7.5 7.5 0 0 0-2.6 1.5l-2.4-1-2 3.5 2 1.5a7.7 7.7 0 0 0 0 3l-2 1.5 2 3.5 2.4-1a7.5 7.5 0 0 0 2.6 1.5L10 22h4l.4-3a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.5z"
+                fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="3.2" fill="none" stroke="white" stroke-width="1.8"/>
+        </svg>
+    </button>
+    <div id="chatboxparent">
+        <textarea id="chatbox" oninput="scalebox(this)" placeholder="Type anything..."></textarea>
+        <button id="send" onclick="if (this.innerHTML == '↑') {sendMessage(document.getElementById('chatbox'));} else {stopAI()}">↑</button>
+    </div>
+    <div id="response"></div>
+
+    <div id="settingsoverlay">
+        <h1>AI Settings</h1>
+        <button onclick="document.getElementById('settingsoverlay').style.display = 'none'" title="Close" id="settingsoverlayclosebutton">X</button>
+        <div id="settings">
+            <button onclick="askoverwrite()" id="clearsavedchat">Clear saved chat</button>
+            <br>
+
+            <div id="selectaimodel">
+                <select title="AI Model" id="model" onchange=" asksave(this.value)">
+                    <option value="llama3.2:3b" selected>llama3.2:3b</option>
+                    <option value="qwen2.5:1.5b">qwen2.5:1.5b</option>
+                    <option value="gemma3:1b">gemma3:1b</option>
+                    <option value="emotion-game">Emotions</option>
+                </select>
+                <p>AI model to use</p>
+            </div>
+
+            <div id="apikeyinputbox">
+                <input id="apikeyinput" placeholder="Enter API Key here..."> <p>API Key</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js" defer></script>
+</body>
+</html>
