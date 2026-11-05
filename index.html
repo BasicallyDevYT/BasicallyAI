@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasicallyAI</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: rgb(0, 0, 0);
+            color: white;
+            text-align: center;
+        }
+
+        #topbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 50px;
+            background: #151515;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            box-sizing: border-box;
+            z-index: 9999;
+            margin-bottom: 10px;
+        }
+
+        #topbar h3 {
+            margin: 0;
+            user-select: none;
+        }
+
+        #topbarbuttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .topbarbutton {
+            background-color: rgb(75, 75, 75);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 14px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .topbarbutton:hover {
+            background-color: rgb(110, 110, 110);
+        }
+
+        #introduction {
+            margin: 0 auto;
+            padding: 110px 20px 80px;
+            max-width: 850px;
+        }
+
+        #introduction h1 {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        #introduction p {
+            font-size: 18px;
+            color: rgb(200, 200, 200);
+            line-height: 1.7;
+        }
+
+        #introduction h1 span {
+            color: rgb(130, 130, 130);
+        }
+
+        #chatbutton {
+            margin-top: 25px;
+            background-color: rgb(100, 100, 100);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 13px 30px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        #chatbutton:hover {
+            background-color: rgb(130, 130, 130);
+        }
+
+        #features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 30px 20px 80px;
+        }
+
+        .feature {
+            background-color: rgb(35, 35, 35);
+            border-radius: 15px;
+            padding: 25px;
+            width: 220px;
+            text-align: left;
+        }
+
+        .feature h2 {
+            font-size: 19px;
+            margin-top: 0;
+        }
+
+        .feature p {
+            color: rgb(180, 180, 180);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        #footer {
+            padding: 20px;
+            color: rgb(130, 130, 130);
+            background-color: #151515;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            #introduction {
+                padding-top: 70px;
+            }
+
+            #introduction h1 {
+                font-size: 36px;
+            }
+
+            #topbar {
+                padding: 0 10px;
+            }
+
+            .topbarbutton {
+                padding: 7px 9px;
+                font-size: 12px;
+            }
+
+            #features {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .feature {
+                box-sizing: border-box;
+                width: 100%;
+                max-width: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="topbar">
+        <h3>BasicallyAI</h3>
+
+        <div id="topbarbuttons">
+            <button id="apidashboardbutton" class="topbarbutton" onclick="location.href='/apidashboard/'">
+                API Dashboard
+            </button>
+        </div>
+    </div>
+
+    <main>
+        <section id="introduction">
+            <h1>Meet <span>BasicallyAI</span></h1>
+
+            <p>
+                An AI assistant designed to help you explore ideas,
+                answer questions, and get things done.
+                Start a conversation and discover what AI can do.
+            </p>
+
+            <button id="chatbutton" onclick="location.href='chat/'">
+                Start chatting
+            </button>
+        </section>
+
+        <section id="features">
+            <div class="feature">
+                <h2>AI Conversations</h2>
+                <p>Chat with AI, ask questions, and explore different topics through natural conversations.</p>
+            </div>
+
+            <div class="feature" id="apifeature">
+                <h2>API Access</h2>
+                <p>Create API keys and integrate BasicallyAI into your own applications and projects.</p>
+            </div>
+
+            <div class="feature">
+                <h2>Easy to Use</h2>
+                <p>A straightforward interface designed to make interacting with AI simple.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer id="footer">
+        BasicallyAI
+    </footer>
+
+    <script>
+        const ENABLE_API_KEY_MANAGEMENT = false;
+
+        const apiDashboardButton = document.getElementById("apidashboardbutton");
+        const apiFeature = document.getElementById("apifeature");
+
+        if (!ENABLE_API_KEY_MANAGEMENT) {
+            apiDashboardButton.remove();
+            apiFeature.remove();
+        }
+    </script>
+</body>
+</html>
